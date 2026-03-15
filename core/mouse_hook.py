@@ -764,6 +764,19 @@ elif sys.platform == "darwin":
                 except Exception as e:
                     print(f"[MouseHook] callback error: {e}")
 
+        def _negate_scroll_axis(self, cg_event, axis):
+            for field_name in (
+                f"kCGScrollWheelEventDeltaAxis{axis}",
+                f"kCGScrollWheelEventFixedPtDeltaAxis{axis}",
+                f"kCGScrollWheelEventPointDeltaAxis{axis}",
+            ):
+                field = getattr(Quartz, field_name, None)
+                if field is None:
+                    continue
+                value = Quartz.CGEventGetIntegerValueField(cg_event, field)
+                if value:
+                    Quartz.CGEventSetIntegerValueField(cg_event, field, -value)
+
         def _gesture_cooldown_active(self):
             return time.monotonic() < self._gesture_cooldown_until
 
@@ -951,6 +964,8 @@ elif sys.platform == "darwin":
                         should_block = MouseEvent.XBUTTON2_UP in self._blocked_events
 
                 elif event_type == Quartz.kCGEventScrollWheel:
+                    if self.invert_vscroll:
+                        self._negate_scroll_axis(cg_event, 1)
                     h_delta = Quartz.CGEventGetIntegerValueField(
                         cg_event, Quartz.kCGScrollWheelEventFixedPtDeltaAxis2)
                     h_delta = h_delta / 65536.0

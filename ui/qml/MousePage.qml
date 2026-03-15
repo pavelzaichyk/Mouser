@@ -977,17 +977,17 @@ Item {
                                     }
 
                                     Text {
-                                        text: "Shows detected buttons, gestures, and mapped actions"
+                                        text: "Collects detected buttons, gestures, and mapped actions"
                                         font { family: Theme.fontFamily; pixelSize: 11 }
                                         color: Theme.textSecondary
                                     }
                                 }
 
                                 Switch {
-                                    checked: backend.debugMode
+                                    checked: backend.debugEventsEnabled
                                     text: checked ? "On" : "Off"
                                     Material.accent: Theme.accent
-                                    onToggled: backend.setDebugMode(checked)
+                                    onToggled: backend.setDebugEventsEnabled(checked)
                                 }
 
                                 Switch {

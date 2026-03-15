@@ -34,6 +34,7 @@ class Backend(QObject):
     dpiFromDevice = Signal(int)
     mouseConnectedChanged = Signal()
     debugLogChanged = Signal()
+    debugEventsEnabledChanged = Signal()
     gestureStateChanged = Signal()
     gestureRecordsChanged = Signal()
 
@@ -49,6 +50,9 @@ class Backend(QObject):
         self._cfg = load_config()
         self._mouse_connected = False
         self._debug_lines = []
+        self._debug_events_enabled = bool(
+            self._cfg.get("settings", {}).get("debug_mode", False)
+        )
         self._record_mode = False
         self._gesture_records = []
         self._gesture_active = False
@@ -150,6 +154,10 @@ class Backend(QObject):
     @Property(bool, notify=settingsChanged)
     def debugMode(self):
         return self._cfg.get("settings", {}).get("debug_mode", False)
+
+    @Property(bool, notify=debugEventsEnabledChanged)
+    def debugEventsEnabled(self):
+        return self._debug_events_enabled
 
     @Property(bool, constant=True)
     def supportsGestureDirections(self):
@@ -281,6 +289,7 @@ class Backend(QObject):
         value = bool(value)
         self._cfg.setdefault("settings", {})["debug_mode"] = value
         save_config(self._cfg)
+        self._debug_events_enabled = value
         if self._engine:
             self._engine.set_debug_enabled(value)
         if value:
@@ -288,6 +297,20 @@ class Backend(QObject):
         else:
             self._append_debug_line("Debug mode disabled")
         self.settingsChanged.emit()
+        self.debugEventsEnabledChanged.emit()
+
+    @Slot(bool)
+    def setDebugEventsEnabled(self, value):
+        value = bool(value)
+        if self._debug_events_enabled == value:
+            return
+        self._debug_events_enabled = value
+        if self._engine:
+            self._engine.set_debug_events_enabled(value)
+        self._append_debug_line(
+            "Debug event capture enabled" if value else "Debug event capture paused"
+        )
+        self.debugEventsEnabledChanged.emit()
 
     @Slot()
     def clearDebugLog(self):

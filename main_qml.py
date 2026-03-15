@@ -160,6 +160,7 @@ def main():
 
     debug_action.triggered.connect(toggle_debug_mode)
     tray_menu.addAction(debug_action)
+    backend.settingsChanged.connect(sync_debug_action)
     sync_debug_action()
 
     tray_menu.addSeparator()

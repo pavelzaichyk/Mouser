@@ -33,6 +33,9 @@ class Engine:
         self._battery_read_cb = None        # UI callback for battery level
         self._battery_poll_stop = threading.Event()
         self._debug_cb = None               # UI callback for debug messages
+        self._debug_events_enabled = bool(
+            self.cfg.get("settings", {}).get("debug_mode", False)
+        )
         self._lock = threading.Lock()
         self.hook.set_debug_callback(self._emit_debug)
         self._setup_hooks()
@@ -56,7 +59,7 @@ class Engine:
         settings = self.cfg.get("settings", {})
         self.hook.invert_vscroll = settings.get("invert_vscroll", False)
         self.hook.invert_hscroll = settings.get("invert_hscroll", False)
-        self.hook.debug_mode = bool(settings.get("debug_mode", False))
+        self.hook.debug_mode = self._debug_events_enabled
         self.hook.configure_gestures(
             enabled=any(mappings.get(key, "none") != "none"
                         for key in GESTURE_DIRECTION_BUTTONS),
@@ -142,6 +145,7 @@ class Engine:
     def set_debug_enabled(self, enabled):
         enabled = bool(enabled)
         self.cfg.setdefault("settings", {})["debug_mode"] = enabled
+        self._debug_events_enabled = enabled
         self.hook.debug_mode = enabled
         if enabled:
             self._emit_debug(f"Debug enabled on profile {self._current_profile}")
@@ -149,11 +153,15 @@ class Engine:
                 "Current mappings", get_active_mappings(self.cfg)
             )
 
+    def set_debug_events_enabled(self, enabled):
+        self._debug_events_enabled = bool(enabled)
+        self.hook.debug_mode = self._debug_events_enabled
+
     def _action_label(self, action_id):
         return ACTIONS.get(action_id, {}).get("label", action_id)
 
     def _emit_debug(self, message):
-        if not self.cfg.get("settings", {}).get("debug_mode", False):
+        if not self._debug_events_enabled:
             return
         if self._debug_cb:
             try:
@@ -162,7 +170,7 @@ class Engine:
                 pass
 
     def _emit_mapping_snapshot(self, prefix, mappings):
-        if not self.cfg.get("settings", {}).get("debug_mode", False):
+        if not self._debug_events_enabled:
             return
         interesting = [
             "gesture",
