@@ -9,7 +9,6 @@ import time
 from urllib.parse import quote
 
 from PySide6.QtCore import QObject, Property, Signal, Slot, Qt, QUrl
-from PySide6.QtWidgets import QFileDialog
 
 from core.app_catalog import get_app_aliases, get_app_catalog, resolve_app_spec
 from core.config import (
@@ -567,6 +566,12 @@ class Backend(QObject):
     @Slot()
     def browseForAppProfile(self):
         """Open a native chooser for a custom app and create a profile for it."""
+        try:
+            from PySide6.QtWidgets import QFileDialog
+        except ImportError:
+            self.statusMessage.emit("Native file picker unavailable")
+            return
+
         start_dir = "/Applications" if sys.platform == "darwin" else os.path.expanduser("~")
         selected_path = ""
 
