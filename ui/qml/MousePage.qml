@@ -659,7 +659,7 @@ Item {
 
                         Rectangle {
                             visible: !backend.hasInteractiveDeviceLayout
-                            width: 420
+                            width: Math.min(420, parent.width - 48)
                             height: fallbackCol.implicitHeight + 32
                             radius: 16
                             color: theme.bgCard
@@ -675,12 +675,14 @@ Item {
 
                                 Text {
                                     text: "Interactive layout coming later"
+                                    width: parent.width
                                     font { family: uiState.fontFamily; pixelSize: 15; bold: true }
                                     color: theme.textPrimary
                                 }
 
                                 Text {
                                     text: backend.deviceLayoutNote
+                                    width: parent.width
                                     wrapMode: Text.WordWrap
                                     font { family: uiState.fontFamily; pixelSize: 12 }
                                     color: theme.textSecondary
@@ -694,12 +696,14 @@ Item {
 
                                 Text {
                                     text: "Try another supported map"
+                                    width: parent.width
                                     font { family: uiState.fontFamily; pixelSize: 12; bold: true }
                                     color: theme.textPrimary
                                 }
 
                                 Text {
                                     text: "This is experimental. If the chosen map is close enough, you can still edit actions and see whether the controls line up on your device."
+                                    width: parent.width
                                     wrapMode: Text.WordWrap
                                     font { family: uiState.fontFamily; pixelSize: 11 }
                                     color: theme.textSecondary
