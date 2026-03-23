@@ -93,6 +93,7 @@ DEFAULT_CONFIG = {
         "invert_hscroll": False,  # swap horizontal scroll directions
         "invert_vscroll": False,  # swap vertical scroll directions
         "dpi": 1000,              # pointer speed / DPI setting
+        "smart_shift_mode": "ratchet",
         "gesture_threshold": 50,
         "gesture_deadzone": 40,
         "gesture_timeout_ms": 3000,

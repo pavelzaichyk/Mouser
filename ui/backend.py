@@ -37,6 +37,7 @@ class Backend(QObject):
     activeProfileChanged = Signal()
     statusMessage = Signal(str)
     dpiFromDevice = Signal(int)
+    smartShiftChanged = Signal()
     mouseConnectedChanged = Signal()
     batteryLevelChanged = Signal()
     debugLogChanged = Signal()
@@ -198,6 +199,14 @@ class Backend(QObject):
     @Property(int, notify=settingsChanged)
     def dpi(self):
         return self._cfg.get("settings", {}).get("dpi", 1000)
+
+    @Property(str, notify=smartShiftChanged)
+    def smartShiftMode(self):
+        return self._cfg.get("settings", {}).get("smart_shift_mode", "ratchet")
+
+    @Property(bool, notify=mouseConnectedChanged)
+    def smartShiftSupported(self):
+        return self._engine.smart_shift_supported if self._engine else False
 
     @Property(bool, notify=settingsChanged)
     def startMinimized(self):
@@ -501,6 +510,14 @@ class Backend(QObject):
         if self._engine:
             self._engine.set_dpi(dpi)
         self.settingsChanged.emit()
+
+    @Slot(str)
+    def setSmartShift(self, mode):
+        self._cfg.setdefault("settings", {})["smart_shift_mode"] = mode
+        save_config(self._cfg)
+        if self._engine:
+            self._engine.set_smart_shift(mode)
+        self.smartShiftChanged.emit()
 
     @Slot(bool)
     def setInvertVScroll(self, value):
