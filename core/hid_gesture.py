@@ -629,6 +629,21 @@ class HidGestureListener:
         if self._thread:
             self._thread.join(timeout=3)
 
+    def trigger_reconnect(self):
+        """Close the current device handle to force a reconnect cycle.
+
+        Safe to call from any thread.  The listener thread's next read()
+        call will raise (closed handle), which trips the existing reconnect
+        logic in _main_loop.
+        """
+        d = self._dev
+        if d:
+            try:
+                d.close()
+            except Exception:
+                pass
+            print("[HidGesture] Reconnect triggered (device handle closed)", flush=True)
+
     @property
     def connected_device(self):
         return self._connected_device_info
