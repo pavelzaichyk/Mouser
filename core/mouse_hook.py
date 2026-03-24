@@ -1497,10 +1497,12 @@ elif sys.platform == "darwin":
                 nc = ws.notificationCenter()
 
                 def _on_wake(notification):
-                    print("[MouseHook] System wake detected, checking event tap", flush=True)
+                    print("[MouseHook] System wake detected", flush=True)
                     if self._tap and self._running:
                         Quartz.CGEventTapEnable(self._tap, True)
                         print("[MouseHook] Event tap re-enabled after wake", flush=True)
+                    if self._hid_gesture:
+                        self._hid_gesture.trigger_reconnect()
 
                 self._wake_observer = nc.addObserverForName_object_queue_usingBlock_(
                     "NSWorkspaceDidWakeNotification",
