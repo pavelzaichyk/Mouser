@@ -639,6 +639,7 @@ class HidGestureListener:
         """
         self._reconnect_requested = True
         d = self._dev
+        self._dev = None   # clear before close so _undivert() sees None
         if d:
             try:
                 d.close()
