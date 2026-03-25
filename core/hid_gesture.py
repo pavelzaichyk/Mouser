@@ -601,6 +601,7 @@ class HidGestureListener:
         self._battery_result = None
         self._last_logged_battery = None
         self._connected_device_info = None
+        self._reconnect_requested = False
 
     # ── public API ────────────────────────────────────────────────
 
@@ -630,19 +631,20 @@ class HidGestureListener:
             self._thread.join(timeout=3)
 
     def trigger_reconnect(self):
-        """Close the current device handle to force a reconnect cycle.
+        """Signal the listener thread to drop and re-establish the connection.
 
-        Safe to call from any thread.  The listener thread's next read()
-        call will raise (closed handle), which trips the existing reconnect
-        logic in _main_loop.
+        Safe to call from any thread.  Sets a flag that the inner read loop
+        checks on every iteration; also closes the device handle to interrupt
+        any blocking read() call in progress.
         """
+        self._reconnect_requested = True
         d = self._dev
         if d:
             try:
                 d.close()
             except Exception:
                 pass
-            print("[HidGesture] Reconnect triggered (device handle closed)", flush=True)
+        print("[HidGesture] Reconnect requested after wake from sleep", flush=True)
 
     @property
     def connected_device(self):
@@ -1392,6 +1394,9 @@ class HidGestureListener:
             print("[HidGesture] Listening for gesture events…")
             try:
                 while self._running:
+                    if self._reconnect_requested:
+                        self._reconnect_requested = False
+                        raise OSError("Reconnect requested after wake from sleep")
                     # Apply any queued DPI command
                     if self._pending_dpi is not None:
                         if self._pending_dpi == "read":
