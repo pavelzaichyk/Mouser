@@ -52,12 +52,12 @@ class LinuxDesktopShortcutTests(unittest.TestCase):
 
     @unittest.skipUnless(sys.platform in ("darwin", "win32"), "tab switching actions are platform-specific")
     def test_tab_switch_actions_exist(self):
-        self.assertIn("next_tab", ACTIONS)
-        self.assertIn("prev_tab", ACTIONS)
-        self.assertEqual(ACTIONS["next_tab"]["category"], "Browser")
-        self.assertEqual(ACTIONS["prev_tab"]["category"], "Browser")
-        self.assertTrue(len(ACTIONS["next_tab"]["keys"]) > 0)
-        self.assertTrue(len(ACTIONS["prev_tab"]["keys"]) > 0)
+        self.assertIn("next_tab", key_simulator.ACTIONS)
+        self.assertIn("prev_tab", key_simulator.ACTIONS)
+        self.assertEqual(key_simulator.ACTIONS["next_tab"]["category"], "Browser")
+        self.assertEqual(key_simulator.ACTIONS["prev_tab"]["category"], "Browser")
+        self.assertTrue(len(key_simulator.ACTIONS["next_tab"]["keys"]) > 0)
+        self.assertTrue(len(key_simulator.ACTIONS["prev_tab"]["keys"]) > 0)
 
 
 if __name__ == "__main__":
